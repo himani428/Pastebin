@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Paste = require("../models/Paste");
-const { nanoid } = require("nanoid/non-secure");
 const { getNow } = require("../utils/time");
 const escapeHtml = require("escape-html");
+
+/* SIMPLE ID GENERATOR */
+const generateId = () =>
+  Math.random().toString(36).substring(2, 8);
 
 /* HEALTH */
 router.get("/healthz", async (req, res) => {
@@ -28,7 +31,7 @@ router.post("/pastes", async (req, res) => {
   if (max_views && (!Number.isInteger(max_views) || max_views < 1))
     return res.status(400).json({ error: "max_views must be >=1 integer" });
 
-  const id = nanoid(6);
+  const id = generateId();
   const now = new Date();
 
   const expiresAt = ttl_seconds
@@ -62,7 +65,6 @@ router.get("/pastes/:id", async (req, res) => {
   if (paste.maxViews && paste.views >= paste.maxViews)
     return res.status(404).json({ error: "View limit exceeded" });
 
-  /* ATOMIC INCREMENT */
   paste.views += 1;
   await paste.save();
 
@@ -95,7 +97,7 @@ router.get("/html/:id", async (req, res) => {
 
   res.send(`
     <html>
-      <body style="font-family:Arial;padding:40px;">
+      <body style="font-family:Poppins;padding:40px;">
         <h2>Paste</h2>
         <pre>${safeContent}</pre>
       </body>
