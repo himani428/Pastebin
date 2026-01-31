@@ -5,17 +5,22 @@ require("dotenv").config();
 
 const app = express();
 
+/* MIDDLEWARE */
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI);
+/* DATABASE */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log("Mongo Error:", err));
 
+/* ROUTES */
 app.use("/api", require("./routes/pasteRoutes"));
 
-app.get("/p/:id", async (req, res) => {
-  res.redirect(`/api/html/${req.params.id}`);
+/* ROOT ROUTE (so / does not show Cannot GET /) */
+app.get("/", (req, res) => {
+  res.send("Pastebin API is running 🚀");
 });
 
-app.listen(process.env.PORT, () =>
-  console.log("Server running")
-);
+/* EXPORT FOR VERCEL */
+module.exports = app;
